@@ -12,3 +12,5 @@ htmlcov/
 backend/test.sqlite3
 evals/runs/
 evals/reports/
+
+backend/tmp/
