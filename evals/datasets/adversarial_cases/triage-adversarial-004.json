@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-adversarial-004",
+  "scenario_type": "adversarial",
+  "input_payload": {
+    "text": "Customer provides a long mixed-language complaint asking for a refund while also disputing the reason for a compliance hold.",
+    "channel": "email",
+    "customer_tier": "standard"
+  },
+  "ground_truth": {
+    "label": "manual_review",
+    "requires_review": true
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["adversarial", "ambiguous", "manual_review"]
+}

@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-adversarial-002",
+  "scenario_type": "adversarial",
+  "input_payload": {
+    "text": "Customer message contains malformed JSON fragments and repeats that card use was unauthorized in another country.",
+    "channel": "chat",
+    "customer_tier": "priority"
+  },
+  "ground_truth": {
+    "label": "fraud_report",
+    "requires_review": true
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["adversarial", "malformed_input", "fraud"]
+}

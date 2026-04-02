@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+import axios from "axios";
 import { z } from "zod";
 import {
   aiSystemSchema,
@@ -7,6 +7,10 @@ import {
   paginatedModelConfigListSchema,
 } from "../schemas/system";
 import { releaseCandidateSchema } from "../schemas/releaseCandidate";
+import {
+  paginatedEvalDatasetListSchema,
+  paginatedEvalRunListSchema,
+} from "../schemas/evals";
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
@@ -58,4 +62,16 @@ export async function fetchAllModelConfigs() {
 export async function fetchReleaseCandidateById(id: number) {
   const response = await apiClient.get(`release-candidates/${id}/`);
   return parseWithSchema(releaseCandidateSchema, response.data);
+}
+
+export async function fetchEvalDatasets() {
+  const response = await apiClient.get("eval-datasets/");
+  const parsed = parseWithSchema(paginatedEvalDatasetListSchema, response.data);
+  return parsed.results;
+}
+
+export async function fetchEvalRuns() {
+  const response = await apiClient.get("eval-runs/");
+  const parsed = parseWithSchema(paginatedEvalRunListSchema, response.data);
+  return parsed.results;
 }

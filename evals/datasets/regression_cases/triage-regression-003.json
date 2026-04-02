@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-regression-003",
+  "scenario_type": "regression",
+  "input_payload": {
+    "text": "Customer asks why a credit line decision changed after submitting the same information twice.",
+    "channel": "email",
+    "customer_tier": "priority"
+  },
+  "ground_truth": {
+    "label": "policy_clarification",
+    "requires_review": true
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["regression", "policy", "consistency"]
+}

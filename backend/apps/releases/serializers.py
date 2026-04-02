@@ -11,6 +11,7 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
     model_config_version_label = serializers.CharField(source="model_config.version_label", read_only=True)
     created_by_username = serializers.CharField(source="created_by.username", read_only=True)
     can_submit = serializers.SerializerMethodField()
+    can_run_evals = serializers.SerializerMethodField()
     blocking_reasons = serializers.SerializerMethodField()
 
     class Meta:
@@ -32,6 +33,7 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "can_submit",
+            "can_run_evals",
             "blocking_reasons",
         ]
         read_only_fields = [
@@ -45,6 +47,7 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "can_submit",
+            "can_run_evals",
             "blocking_reasons",
         ]
 
@@ -67,6 +70,13 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
 
     def get_can_submit(self, obj):
         return obj.status == ReleaseCandidateStatus.DRAFT
+
+    def get_can_run_evals(self, obj):
+        return obj.status in {
+            ReleaseCandidateStatus.PENDING_EVAL,
+            ReleaseCandidateStatus.EVAL_FAILED,
+            ReleaseCandidateStatus.PENDING_APPROVAL,
+        }
 
     def get_blocking_reasons(self, obj):
         reasons = []

@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-baseline-004",
+  "scenario_type": "baseline",
+  "input_payload": {
+    "text": "Customer asks for a refund after being billed twice for the same subscription.",
+    "channel": "email",
+    "customer_tier": "standard"
+  },
+  "ground_truth": {
+    "label": "refund_request",
+    "requires_review": false
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["baseline", "refund", "billing"]
+}

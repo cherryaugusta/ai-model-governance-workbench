@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-regression-004",
+  "scenario_type": "regression",
+  "input_payload": {
+    "text": "Customer requests a status update on a chargeback investigation already opened last week.",
+    "channel": "phone",
+    "customer_tier": "priority"
+  },
+  "ground_truth": {
+    "label": "fraud_report",
+    "requires_review": true
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["regression", "fraud", "existing_case"]
+}

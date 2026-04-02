@@ -4,6 +4,8 @@ from rest_framework.response import Response
 
 from apps.audits.services import log_audit_event
 from apps.core.choices import ActorType
+from apps.evals.tasks import evaluate_eval_run_task
+from apps.evals.services import queue_candidate_evals
 
 from .models import ReleaseCandidate
 from .serializers import ReleaseCandidateSerializer
@@ -71,3 +73,26 @@ class ReleaseCandidateViewSet(viewsets.ModelViewSet):
         )
         serializer = self.get_serializer(candidate)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="run-evals")
+    def run_evals(self, request, pk=None):
+        candidate = self.get_object()
+        correlation_id = getattr(request, "correlation_id", "")
+        queued_runs = queue_candidate_evals(
+            candidate=candidate,
+            actor=request.user,
+            correlation_id=correlation_id,
+        )
+
+        for run in queued_runs:
+            evaluate_eval_run_task.delay(run.id, correlation_id)
+
+        serializer = self.get_serializer(candidate)
+        return Response(
+            {
+                "release_candidate": serializer.data,
+                "queued_eval_run_ids": [run.id for run in queued_runs],
+                "run_label": queued_runs[0].run_label.rsplit("-", 1)[0] if queued_runs else "",
+            },
+            status=status.HTTP_202_ACCEPTED,
+        )

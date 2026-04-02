@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-regression-002",
+  "scenario_type": "regression",
+  "input_payload": {
+    "text": "Customer wants confirmation that a previous complaint was routed to the specialist team.",
+    "channel": "chat",
+    "customer_tier": "standard"
+  },
+  "ground_truth": {
+    "label": "manual_review",
+    "requires_review": true
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["regression", "routing", "manual_review"]
+}

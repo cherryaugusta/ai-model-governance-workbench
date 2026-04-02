@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-baseline-001",
+  "scenario_type": "baseline",
+  "input_payload": {
+    "text": "Customer says interest charges were not explained and requests escalation.",
+    "channel": "email",
+    "customer_tier": "standard"
+  },
+  "ground_truth": {
+    "label": "consumer_understanding",
+    "requires_review": true
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["baseline", "escalation", "review"]
+}

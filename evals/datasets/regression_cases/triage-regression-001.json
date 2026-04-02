@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-regression-001",
+  "scenario_type": "regression",
+  "input_payload": {
+    "text": "Customer says late fees were charged after a promised payment holiday.",
+    "channel": "email",
+    "customer_tier": "standard"
+  },
+  "ground_truth": {
+    "label": "billing_dispute",
+    "requires_review": true
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["regression", "billing", "review"]
+}

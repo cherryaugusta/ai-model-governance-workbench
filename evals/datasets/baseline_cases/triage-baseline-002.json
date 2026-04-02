@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-baseline-002",
+  "scenario_type": "baseline",
+  "input_payload": {
+    "text": "Customer cannot access the account after changing phones and needs help resetting sign-in.",
+    "channel": "chat",
+    "customer_tier": "standard"
+  },
+  "ground_truth": {
+    "label": "account_access",
+    "requires_review": false
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["baseline", "authentication"]
+}

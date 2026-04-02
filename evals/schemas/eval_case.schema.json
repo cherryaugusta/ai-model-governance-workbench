@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Eval Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "scenario_type",
+    "input_payload",
+    "ground_truth",
+    "expected_metrics",
+    "tags"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_type": {
+      "type": "string",
+      "enum": ["baseline", "regression", "adversarial"]
+    },
+    "input_payload": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ground_truth": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["label", "requires_review"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requires_review": {
+          "type": "boolean"
+        }
+      }
+    },
+    "expected_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["schema_valid", "max_latency_ms", "max_cost_estimate"],
+      "properties": {
+        "schema_valid": {
+          "type": "boolean"
+        },
+        "max_latency_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_cost_estimate": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

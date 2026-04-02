@@ -1,0 +1,19 @@
+{
+  "case_id": "triage-baseline-003",
+  "scenario_type": "baseline",
+  "input_payload": {
+    "text": "Customer reports an unauthorized card transaction and asks for urgent support.",
+    "channel": "phone",
+    "customer_tier": "priority"
+  },
+  "ground_truth": {
+    "label": "fraud_report",
+    "requires_review": true
+  },
+  "expected_metrics": {
+    "schema_valid": true,
+    "max_latency_ms": 2500,
+    "max_cost_estimate": 0.02
+  },
+  "tags": ["baseline", "fraud", "urgent"]
+}
