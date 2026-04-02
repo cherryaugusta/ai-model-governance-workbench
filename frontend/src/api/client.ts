@@ -6,6 +6,7 @@ import {
   paginatedPromptVersionListSchema,
   paginatedModelConfigListSchema,
 } from "../schemas/system";
+import { releaseCandidateSchema } from "../schemas/releaseCandidate";
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
@@ -52,4 +53,9 @@ export async function fetchAllModelConfigs() {
   const response = await apiClient.get("model-configs/");
   const parsed = parseWithSchema(paginatedModelConfigListSchema, response.data);
   return parsed.results;
+}
+
+export async function fetchReleaseCandidateById(id: number) {
+  const response = await apiClient.get(`release-candidates/${id}/`);
+  return parseWithSchema(releaseCandidateSchema, response.data);
 }

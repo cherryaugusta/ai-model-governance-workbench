@@ -30,7 +30,7 @@ class ReleaseCandidate(TimestampedModel):
         choices=ReleaseCandidateStatus.choices,
         default=ReleaseCandidateStatus.DRAFT,
     )
-    eval_dataset_ids = models.JSONField(default=list)
+    eval_dataset_ids = models.JSONField(default=list, blank=True)
     config_snapshot = models.JSONField(default=dict, blank=True)
     created_by = models.ForeignKey(
         "auth.User",

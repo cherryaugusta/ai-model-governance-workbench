@@ -165,6 +165,10 @@ export function SystemDetailPage() {
               <strong className="stat-value">Pending</strong>
             </div>
           </div>
+          <div className="spacer-sm" />
+          <Link className="secondary-link" to="/release-candidates/1">
+            Open release candidate 1
+          </Link>
         </div>
       </div>
 
@@ -232,6 +236,3 @@ export function SystemDetailPage() {
     </section>
   );
 }
-
-
-
