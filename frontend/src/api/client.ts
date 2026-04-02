@@ -11,6 +11,11 @@ import {
   paginatedEvalDatasetListSchema,
   paginatedEvalRunListSchema,
 } from "../schemas/evals";
+import {
+  approvalDecisionPayloadSchema,
+  approvalRecordSchema,
+  paginatedApprovalRecordListSchema,
+} from "../schemas/approvals";
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
@@ -74,4 +79,44 @@ export async function fetchEvalRuns() {
   const response = await apiClient.get("eval-runs/");
   const parsed = parseWithSchema(paginatedEvalRunListSchema, response.data);
   return parsed.results;
+}
+
+export async function fetchApprovals(params?: {
+  release_candidate?: number;
+  approval_type?: string;
+  decision?: string;
+}) {
+  const response = await apiClient.get("approvals/", { params });
+  const parsed = parseWithSchema(paginatedApprovalRecordListSchema, response.data);
+  return parsed.results;
+}
+
+export async function approveApproval(
+  id: number,
+  payload: { comment: string },
+) {
+  const parsedPayload = parseWithSchema(approvalDecisionPayloadSchema, payload);
+  const response = await apiClient.post(`approvals/${id}/approve/`, parsedPayload);
+  return parseWithSchema(approvalRecordSchema, response.data);
+}
+
+export async function rejectApproval(
+  id: number,
+  payload: { comment: string },
+) {
+  const parsedPayload = parseWithSchema(approvalDecisionPayloadSchema, payload);
+  const response = await apiClient.post(`approvals/${id}/reject/`, parsedPayload);
+  return parseWithSchema(approvalRecordSchema, response.data);
+}
+
+export async function requestApprovalChanges(
+  id: number,
+  payload: { comment: string },
+) {
+  const parsedPayload = parseWithSchema(approvalDecisionPayloadSchema, payload);
+  const response = await apiClient.post(
+    `approvals/${id}/request-changes/`,
+    parsedPayload,
+  );
+  return parseWithSchema(approvalRecordSchema, response.data);
 }
