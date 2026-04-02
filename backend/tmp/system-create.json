@@ -1,0 +1,12 @@
+{
+  "name": "Consumer Support Triage Assistant",
+  "slug": "consumer-support-triage-assistant",
+  "description": "Routes and classifies support complaints.",
+  "owner_team": "Support Operations",
+  "technical_owner": 1,
+  "business_owner": 1,
+  "risk_tier": "high",
+  "system_type": "classification",
+  "domain_area": "customer_support",
+  "status": "draft"
+}
