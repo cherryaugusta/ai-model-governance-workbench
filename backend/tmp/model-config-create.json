@@ -1,0 +1,17 @@
+{
+  "ai_system": 1,
+  "version_label": "v1",
+  "provider_name": "openai",
+  "model_name": "gpt-4.1-mini",
+  "temperature": "0.20",
+  "max_tokens": 512,
+  "top_p": "1.00",
+  "timeout_ms": 2500,
+  "routing_policy": {
+    "mode": "primary_only"
+  },
+  "fallback_policy": {
+    "enabled": false
+  },
+  "cost_budget_per_run": "0.0200"
+}

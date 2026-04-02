@@ -28,11 +28,10 @@ class ModelConfigSerializer(serializers.ModelSerializer):
             "created_by_username",
             "created_at",
         ]
-        read_only_fields = ["status", "created_at"]
-
-    def create(self, validated_data):
-        if "created_by" not in validated_data:
-            request = self.context.get("request")
-            if request and request.user and request.user.is_authenticated:
-                validated_data["created_by"] = request.user
-        return super().create(validated_data)
+        read_only_fields = [
+            "status",
+            "created_at",
+            "created_by",
+            "created_by_username",
+            "ai_system_name",
+        ]
