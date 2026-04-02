@@ -20,7 +20,7 @@ export const approvalRecordSchema = z.object({
   release_candidate_name: z.string(),
   approval_type: approvalTypeSchema,
   reviewer: z.number().nullable(),
-  reviewer_username: z.string().nullable(),
+  reviewer_username: z.string().nullable().optional(),
   decision: approvalDecisionSchema,
   comment: z.string(),
   decided_at: z.string().nullable(),
