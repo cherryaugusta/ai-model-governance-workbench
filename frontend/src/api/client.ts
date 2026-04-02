@@ -16,6 +16,9 @@ import {
   approvalRecordSchema,
   paginatedApprovalRecordListSchema,
 } from "../schemas/approvals";
+import { paginatedIncidentListSchema } from "../schemas/incidents";
+import { paginatedAuditEventListSchema } from "../schemas/audits";
+import { metricsOverviewSchema } from "../schemas/metrics";
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
@@ -119,4 +122,31 @@ export async function requestApprovalChanges(
     parsedPayload,
   );
   return parseWithSchema(approvalRecordSchema, response.data);
+}
+
+export async function fetchIncidents(params?: {
+  ai_system?: number;
+  release_candidate?: number;
+  severity?: string;
+  status?: string;
+  incident_type?: string;
+}) {
+  const response = await apiClient.get("incidents/", { params });
+  const parsed = parseWithSchema(paginatedIncidentListSchema, response.data);
+  return parsed.results;
+}
+
+export async function fetchAuditEvents(params?: {
+  entity_type?: string;
+  event_type?: string;
+  actor_type?: string;
+}) {
+  const response = await apiClient.get("audit-events/", { params });
+  const parsed = parseWithSchema(paginatedAuditEventListSchema, response.data);
+  return parsed.results;
+}
+
+export async function fetchMetricsOverview() {
+  const response = await apiClient.get("metrics/overview/");
+  return parseWithSchema(metricsOverviewSchema, response.data);
 }
