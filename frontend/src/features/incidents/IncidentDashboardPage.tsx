@@ -9,7 +9,7 @@ function formatTimestamp(value: string) {
   return new Date(value).toLocaleString();
 }
 
-export function IncidentsPlaceholderPage() {
+export function IncidentDashboardPage() {
   const [severityFilter, setSeverityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 

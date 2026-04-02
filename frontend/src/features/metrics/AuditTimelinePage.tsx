@@ -8,7 +8,7 @@ function formatTimestamp(value: string) {
   return new Date(value).toLocaleString();
 }
 
-export function MetricsPlaceholderPage() {
+export function AuditTimelinePage() {
   const metricsQuery = useQuery({
     queryKey: ["metrics-overview"],
     queryFn: fetchMetricsOverview,
