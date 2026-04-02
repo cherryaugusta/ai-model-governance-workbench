@@ -6,7 +6,12 @@ import {
   paginatedPromptVersionListSchema,
   paginatedModelConfigListSchema,
 } from "../schemas/system";
-import { releaseCandidateSchema } from "../schemas/releaseCandidate";
+import {
+  promoteReleaseCandidatePayloadSchema,
+  releaseCandidateSchema,
+  rollbackReleaseCandidatePayloadSchema,
+  rollbackReleaseCandidateResponseSchema,
+} from "../schemas/releaseCandidate";
 import {
   paginatedEvalDatasetListSchema,
   paginatedEvalRunListSchema,
@@ -70,6 +75,36 @@ export async function fetchAllModelConfigs() {
 export async function fetchReleaseCandidateById(id: number) {
   const response = await apiClient.get(`release-candidates/${id}/`);
   return parseWithSchema(releaseCandidateSchema, response.data);
+}
+
+export async function promoteReleaseCandidate(
+  id: number,
+  payload: { reason: string },
+) {
+  const parsedPayload = parseWithSchema(
+    promoteReleaseCandidatePayloadSchema,
+    payload,
+  );
+  const response = await apiClient.post(
+    `release-candidates/${id}/promote/`,
+    parsedPayload,
+  );
+  return parseWithSchema(releaseCandidateSchema, response.data);
+}
+
+export async function rollbackReleaseCandidate(
+  id: number,
+  payload: { reason_code: string; comment: string },
+) {
+  const parsedPayload = parseWithSchema(
+    rollbackReleaseCandidatePayloadSchema,
+    payload,
+  );
+  const response = await apiClient.post(
+    `release-candidates/${id}/rollback/`,
+    parsedPayload,
+  );
+  return parseWithSchema(rollbackReleaseCandidateResponseSchema, response.data);
 }
 
 export async function fetchEvalDatasets() {
