@@ -9,8 +9,16 @@ from apps.evals.services import queue_candidate_evals
 from apps.evals.tasks import evaluate_eval_run_task
 
 from .models import ReleaseCandidate
-from .serializers import ReleaseCandidateSerializer
-from .services import submit_release_candidate
+from .serializers import (
+    ReleaseCandidateSerializer,
+    ReleasePromotionSerializer,
+    ReleaseRollbackSerializer,
+)
+from .services import (
+    promote_candidate,
+    rollback_release_candidate,
+    submit_release_candidate,
+)
 
 
 class ReleaseCandidateViewSet(viewsets.ModelViewSet):
@@ -111,6 +119,47 @@ class ReleaseCandidateViewSet(viewsets.ModelViewSet):
             {
                 "release_candidate": serializer.data,
                 "approval_record_ids": [approval.id for approval in approvals],
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=["post"])
+    def promote(self, request, pk=None):
+        candidate = self.get_object()
+        payload = ReleasePromotionSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+
+        candidate = promote_candidate(
+            candidate=candidate,
+            actor=request.user,
+            reason=payload.validated_data["reason"],
+            correlation_id=getattr(request, "correlation_id", ""),
+        )
+
+        return Response(
+            self.get_serializer(candidate).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=["post"])
+    def rollback(self, request, pk=None):
+        candidate = self.get_object()
+        payload = ReleaseRollbackSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+
+        result = rollback_release_candidate(
+            candidate=candidate,
+            actor=request.user,
+            reason_code=payload.validated_data["reason_code"],
+            comment=payload.validated_data["comment"],
+            correlation_id=getattr(request, "correlation_id", ""),
+        )
+
+        return Response(
+            {
+                "from_candidate": self.get_serializer(result["from_candidate"]).data,
+                "to_candidate": self.get_serializer(result["to_candidate"]).data,
+                "rollback_record_id": result["rollback_record"].id,
             },
             status=status.HTTP_200_OK,
         )

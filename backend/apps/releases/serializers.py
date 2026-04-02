@@ -4,6 +4,16 @@ from apps.approvals.services import approval_summary, required_approval_types_fo
 from apps.core.choices import ReleaseCandidateStatus
 
 from .models import ReleaseCandidate
+from .services import promotion_blocking_reasons, rollback_blocking_reasons
+
+
+class ReleasePromotionSerializer(serializers.Serializer):
+    reason = serializers.CharField(required=False, allow_blank=True, default="")
+
+
+class ReleaseRollbackSerializer(serializers.Serializer):
+    reason_code = serializers.CharField()
+    comment = serializers.CharField(required=False, allow_blank=True, default="")
 
 
 class ReleaseCandidateSerializer(serializers.ModelSerializer):
@@ -14,6 +24,8 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
     can_submit = serializers.SerializerMethodField()
     can_run_evals = serializers.SerializerMethodField()
     can_request_approval = serializers.SerializerMethodField()
+    can_promote = serializers.SerializerMethodField()
+    can_rollback = serializers.SerializerMethodField()
     required_approval_types = serializers.SerializerMethodField()
     approval_summary = serializers.SerializerMethodField()
     blocking_reasons = serializers.SerializerMethodField()
@@ -39,6 +51,8 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
             "can_submit",
             "can_run_evals",
             "can_request_approval",
+            "can_promote",
+            "can_rollback",
             "required_approval_types",
             "approval_summary",
             "blocking_reasons",
@@ -56,6 +70,8 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
             "can_submit",
             "can_run_evals",
             "can_request_approval",
+            "can_promote",
+            "can_rollback",
             "required_approval_types",
             "approval_summary",
             "blocking_reasons",
@@ -91,6 +107,12 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
     def get_can_request_approval(self, obj):
         return obj.status == ReleaseCandidateStatus.PENDING_APPROVAL
 
+    def get_can_promote(self, obj):
+        return len(promotion_blocking_reasons(obj)) == 0
+
+    def get_can_rollback(self, obj):
+        return len(rollback_blocking_reasons(obj)) == 0
+
     def get_required_approval_types(self, obj):
         return required_approval_types_for_risk(obj.ai_system.risk_tier)
 
@@ -125,5 +147,18 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
                 reasons.append("approval_queue_not_initialized")
             elif not summary["is_complete"]:
                 reasons.append("required_approvals_incomplete")
+
+        if obj.status != ReleaseCandidateStatus.ACTIVE:
+            reasons.extend(
+                reason
+                for reason in promotion_blocking_reasons(obj)
+                if reason not in reasons
+            )
+        else:
+            reasons.extend(
+                reason
+                for reason in rollback_blocking_reasons(obj)
+                if reason not in reasons
+            )
 
         return reasons
