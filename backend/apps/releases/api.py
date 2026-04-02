@@ -2,10 +2,11 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.approvals.services import request_candidate_approval
 from apps.audits.services import log_audit_event
 from apps.core.choices import ActorType
-from apps.evals.tasks import evaluate_eval_run_task
 from apps.evals.services import queue_candidate_evals
+from apps.evals.tasks import evaluate_eval_run_task
 
 from .models import ReleaseCandidate
 from .serializers import ReleaseCandidateSerializer
@@ -95,4 +96,21 @@ class ReleaseCandidateViewSet(viewsets.ModelViewSet):
                 "run_label": queued_runs[0].run_label.rsplit("-", 1)[0] if queued_runs else "",
             },
             status=status.HTTP_202_ACCEPTED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="request-approval")
+    def request_approval(self, request, pk=None):
+        candidate = self.get_object()
+        approvals = request_candidate_approval(
+            candidate=candidate,
+            actor=request.user,
+            correlation_id=getattr(request, "correlation_id", ""),
+        )
+        serializer = self.get_serializer(candidate)
+        return Response(
+            {
+                "release_candidate": serializer.data,
+                "approval_record_ids": [approval.id for approval in approvals],
+            },
+            status=status.HTTP_200_OK,
         )

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.approvals.services import approval_summary, required_approval_types_for_risk
 from apps.core.choices import ReleaseCandidateStatus
 
 from .models import ReleaseCandidate
@@ -12,6 +13,9 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
     created_by_username = serializers.CharField(source="created_by.username", read_only=True)
     can_submit = serializers.SerializerMethodField()
     can_run_evals = serializers.SerializerMethodField()
+    can_request_approval = serializers.SerializerMethodField()
+    required_approval_types = serializers.SerializerMethodField()
+    approval_summary = serializers.SerializerMethodField()
     blocking_reasons = serializers.SerializerMethodField()
 
     class Meta:
@@ -34,6 +38,9 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
             "updated_at",
             "can_submit",
             "can_run_evals",
+            "can_request_approval",
+            "required_approval_types",
+            "approval_summary",
             "blocking_reasons",
         ]
         read_only_fields = [
@@ -48,6 +55,9 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
             "updated_at",
             "can_submit",
             "can_run_evals",
+            "can_request_approval",
+            "required_approval_types",
+            "approval_summary",
             "blocking_reasons",
         ]
 
@@ -78,6 +88,15 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
             ReleaseCandidateStatus.PENDING_APPROVAL,
         }
 
+    def get_can_request_approval(self, obj):
+        return obj.status == ReleaseCandidateStatus.PENDING_APPROVAL
+
+    def get_required_approval_types(self, obj):
+        return required_approval_types_for_risk(obj.ai_system.risk_tier)
+
+    def get_approval_summary(self, obj):
+        return approval_summary(obj)
+
     def get_blocking_reasons(self, obj):
         reasons = []
 
@@ -100,6 +119,11 @@ class ReleaseCandidateSerializer(serializers.ModelSerializer):
             reasons.append("latest_eval_failed")
 
         if obj.status == ReleaseCandidateStatus.PENDING_APPROVAL:
-            reasons.append("awaiting_approval_workflow")
+            summary = approval_summary(obj)
+
+            if summary["missing_types"]:
+                reasons.append("approval_queue_not_initialized")
+            elif not summary["is_complete"]:
+                reasons.append("required_approvals_incomplete")
 
         return reasons
