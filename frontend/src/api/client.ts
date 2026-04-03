@@ -2,9 +2,11 @@ import axios from "axios";
 import { z } from "zod";
 import {
   aiSystemSchema,
+  modelConfigSchema,
   paginatedAISystemListSchema,
-  paginatedPromptVersionListSchema,
   paginatedModelConfigListSchema,
+  paginatedPromptVersionListSchema,
+  promptVersionSchema,
 } from "../schemas/system";
 import {
   promoteReleaseCandidatePayloadSchema,
@@ -66,10 +68,20 @@ export async function fetchAllPrompts() {
   return parsed.results;
 }
 
+export async function fetchPromptById(id: number) {
+  const response = await apiClient.get(`prompts/${id}/`);
+  return parseWithSchema(promptVersionSchema, response.data);
+}
+
 export async function fetchAllModelConfigs() {
   const response = await apiClient.get("model-configs/");
   const parsed = parseWithSchema(paginatedModelConfigListSchema, response.data);
   return parsed.results;
+}
+
+export async function fetchModelConfigById(id: number) {
+  const response = await apiClient.get(`model-configs/${id}/`);
+  return parseWithSchema(modelConfigSchema, response.data);
 }
 
 export async function fetchReleaseCandidateById(id: number) {

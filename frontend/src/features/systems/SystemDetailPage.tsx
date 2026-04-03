@@ -141,7 +141,16 @@ export function SystemDetailPage() {
         <div className="panel">
           <h3>Active release</h3>
           {system.active_release_id ? (
-            <p>Current active release id: {system.active_release_id}</p>
+            <div className="list-card">
+              <strong>Release candidate {system.active_release_id}</strong>
+              <div className="spacer-sm" />
+              <Link
+                className="secondary-link"
+                to={`/release-candidates/${system.active_release_id}`}
+              >
+                Open active release candidate
+              </Link>
+            </div>
           ) : (
             <p className="muted">No active release yet.</p>
           )}
@@ -157,18 +166,20 @@ export function SystemDetailPage() {
               <strong className="stat-value">{modelConfigs.length}</strong>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Eval summary</span>
-              <strong className="stat-value">Pending</strong>
+              <span className="stat-label">Latest prompt</span>
+              <strong className="stat-value">
+                {prompts.length > 0 ? prompts[prompts.length - 1].version_label : "n/a"}
+              </strong>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Incident summary</span>
-              <strong className="stat-value">Pending</strong>
+              <span className="stat-label">Latest model config</span>
+              <strong className="stat-value">
+                {modelConfigs.length > 0
+                  ? modelConfigs[modelConfigs.length - 1].version_label
+                  : "n/a"}
+              </strong>
             </div>
           </div>
-          <div className="spacer-sm" />
-          <Link className="secondary-link" to="/release-candidates/1">
-            Open release candidate 1
-          </Link>
         </div>
       </div>
 
@@ -196,6 +207,10 @@ export function SystemDetailPage() {
                 <div className="table-subtext">
                   Created by: {prompt.created_by_username ?? "Unknown"}
                 </div>
+                <div className="spacer-sm" />
+                <Link className="secondary-link" to={`/prompts/${prompt.id}`}>
+                  Open prompt detail
+                </Link>
               </div>
             ))}
           </div>
@@ -228,6 +243,13 @@ export function SystemDetailPage() {
                 <div className="table-subtext">
                   Created by: {modelConfig.created_by_username ?? "Unknown"}
                 </div>
+                <div className="spacer-sm" />
+                <Link
+                  className="secondary-link"
+                  to={`/model-configs/${modelConfig.id}`}
+                >
+                  Open model config detail
+                </Link>
               </div>
             ))}
           </div>
