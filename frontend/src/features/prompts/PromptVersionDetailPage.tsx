@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import {
   fetchAllPrompts,
+  fetchAllReleaseCandidates,
   fetchPromptById,
-  fetchReleaseCandidateById,
 } from "../../api/client";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
@@ -29,10 +29,9 @@ export function PromptVersionDetailPage() {
     queryFn: fetchAllPrompts,
   });
 
-  const linkedCandidateQuery = useQuery({
-    queryKey: ["release-candidate", 1],
-    queryFn: () => fetchReleaseCandidateById(1),
-    retry: false,
+  const releaseCandidatesQuery = useQuery({
+    queryKey: ["release-candidates"],
+    queryFn: fetchAllReleaseCandidates,
   });
 
   const previousPrompt = useMemo(() => {
@@ -51,11 +50,28 @@ export function PromptVersionDetailPage() {
     return previous.length > 0 ? previous[previous.length - 1] : null;
   }, [allPromptsQuery.data, promptQuery.data]);
 
+  const linkedCandidates = useMemo(() => {
+    const prompt = promptQuery.data;
+    const releaseCandidates = releaseCandidatesQuery.data ?? [];
+
+    if (!prompt) {
+      return [];
+    }
+
+    return releaseCandidates
+      .filter((candidate) => candidate.prompt_version === prompt.id)
+      .sort((left, right) => right.id - left.id);
+  }, [promptQuery.data, releaseCandidatesQuery.data]);
+
   if (!Number.isFinite(promptId)) {
     return <ErrorState message="The prompt id in the route is invalid." />;
   }
 
-  if (promptQuery.isLoading || allPromptsQuery.isLoading) {
+  if (
+    promptQuery.isLoading ||
+    allPromptsQuery.isLoading ||
+    releaseCandidatesQuery.isLoading
+  ) {
     return <LoadingSpinner label="Loading prompt detail..." />;
   }
 
@@ -67,17 +83,15 @@ export function PromptVersionDetailPage() {
     return <ErrorState message="Prompt inventory could not be loaded from the backend API." />;
   }
 
+  if (releaseCandidatesQuery.isError) {
+    return <ErrorState message="Linked release candidates could not be loaded from the backend API." />;
+  }
+
   const prompt = promptQuery.data;
 
   if (!prompt) {
     return <ErrorState message="The requested prompt version was not returned by the backend API." />;
   }
-
-  const linkedCandidate =
-    linkedCandidateQuery.data &&
-    linkedCandidateQuery.data.prompt_version === prompt.id
-      ? linkedCandidateQuery.data
-      : null;
 
   return (
     <section className="page-section">
@@ -133,24 +147,29 @@ export function PromptVersionDetailPage() {
 
         <div className="panel">
           <h3>Linked release candidates</h3>
-          {linkedCandidate ? (
-            <div className="list-card">
-              <strong>{linkedCandidate.name}</strong>
-              <div className="table-subtext">Candidate ID: {linkedCandidate.id}</div>
-              <div className="table-subtext">
-                Status: {linkedCandidate.status}
-              </div>
-              <div className="spacer-sm" />
-              <Link
-                className="secondary-link"
-                to={`/release-candidates/${linkedCandidate.id}`}
-              >
-                Open linked candidate
-              </Link>
+          {linkedCandidates.length > 0 ? (
+            <div className="list-stack">
+              {linkedCandidates.map((candidate) => (
+                <div key={candidate.id} className="list-card">
+                  <strong>{candidate.name}</strong>
+                  <div className="table-subtext">Candidate ID: {candidate.id}</div>
+                  <div className="table-subtext">Status: {candidate.status}</div>
+                  <div className="table-subtext">
+                    Model config: {candidate.model_config_version_label}
+                  </div>
+                  <div className="spacer-sm" />
+                  <Link
+                    className="secondary-link"
+                    to={`/release-candidates/${candidate.id}`}
+                  >
+                    Open linked candidate
+                  </Link>
+                </div>
+              ))}
             </div>
           ) : (
             <p className="muted">
-              No linked release candidate is currently surfaced by this frontend view.
+              No linked release candidates were found for this prompt version.
             </p>
           )}
         </div>

@@ -89,6 +89,18 @@ export async function fetchReleaseCandidateById(id: number) {
   return parseWithSchema(releaseCandidateSchema, response.data);
 }
 
+export async function fetchAllReleaseCandidates() {
+  const response = await apiClient.get("release-candidates/");
+  const parsed = z.object({
+    count: z.number(),
+    next: z.string().nullable(),
+    previous: z.string().nullable(),
+    results: z.array(releaseCandidateSchema),
+  }).parse(response.data);
+
+  return parsed.results;
+}
+
 export async function promoteReleaseCandidate(
   id: number,
   payload: { reason: string },

@@ -1,8 +1,9 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import {
+  fetchAllReleaseCandidates,
   fetchModelConfigById,
-  fetchReleaseCandidateById,
 } from "../../api/client";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
@@ -22,17 +23,29 @@ export function ModelConfigDetailPage() {
     enabled: Number.isFinite(modelConfigId),
   });
 
-  const linkedCandidateQuery = useQuery({
-    queryKey: ["release-candidate", 1],
-    queryFn: () => fetchReleaseCandidateById(1),
-    retry: false,
+  const releaseCandidatesQuery = useQuery({
+    queryKey: ["release-candidates"],
+    queryFn: fetchAllReleaseCandidates,
   });
+
+  const linkedCandidates = useMemo(() => {
+    const modelConfig = modelConfigQuery.data;
+    const releaseCandidates = releaseCandidatesQuery.data ?? [];
+
+    if (!modelConfig) {
+      return [];
+    }
+
+    return releaseCandidates
+      .filter((candidate) => candidate.model_config === modelConfig.id)
+      .sort((left, right) => right.id - left.id);
+  }, [modelConfigQuery.data, releaseCandidatesQuery.data]);
 
   if (!Number.isFinite(modelConfigId)) {
     return <ErrorState message="The model configuration id in the route is invalid." />;
   }
 
-  if (modelConfigQuery.isLoading) {
+  if (modelConfigQuery.isLoading || releaseCandidatesQuery.isLoading) {
     return <LoadingSpinner label="Loading model configuration detail..." />;
   }
 
@@ -40,17 +53,15 @@ export function ModelConfigDetailPage() {
     return <ErrorState message="The model configuration detail could not be loaded from the backend API." />;
   }
 
+  if (releaseCandidatesQuery.isError) {
+    return <ErrorState message="Linked release candidates could not be loaded from the backend API." />;
+  }
+
   const modelConfig = modelConfigQuery.data;
 
   if (!modelConfig) {
     return <ErrorState message="The requested model configuration was not returned by the backend API." />;
   }
-
-  const linkedCandidate =
-    linkedCandidateQuery.data &&
-    linkedCandidateQuery.data.model_config === modelConfig.id
-      ? linkedCandidateQuery.data
-      : null;
 
   return (
     <section className="page-section">
@@ -128,24 +139,29 @@ export function ModelConfigDetailPage() {
 
         <div className="panel">
           <h3>Linked release candidates</h3>
-          {linkedCandidate ? (
-            <div className="list-card">
-              <strong>{linkedCandidate.name}</strong>
-              <div className="table-subtext">Candidate ID: {linkedCandidate.id}</div>
-              <div className="table-subtext">
-                Status: {linkedCandidate.status}
-              </div>
-              <div className="spacer-sm" />
-              <Link
-                className="secondary-link"
-                to={`/release-candidates/${linkedCandidate.id}`}
-              >
-                Open linked candidate
-              </Link>
+          {linkedCandidates.length > 0 ? (
+            <div className="list-stack">
+              {linkedCandidates.map((candidate) => (
+                <div key={candidate.id} className="list-card">
+                  <strong>{candidate.name}</strong>
+                  <div className="table-subtext">Candidate ID: {candidate.id}</div>
+                  <div className="table-subtext">Status: {candidate.status}</div>
+                  <div className="table-subtext">
+                    Prompt version: {candidate.prompt_version_label}
+                  </div>
+                  <div className="spacer-sm" />
+                  <Link
+                    className="secondary-link"
+                    to={`/release-candidates/${candidate.id}`}
+                  >
+                    Open linked candidate
+                  </Link>
+                </div>
+              ))}
             </div>
           ) : (
             <p className="muted">
-              No linked release candidate is currently surfaced by this frontend view.
+              No linked release candidates were found for this model configuration.
             </p>
           )}
         </div>
