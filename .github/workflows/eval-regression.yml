@@ -1,0 +1,45 @@
+name: eval-regression
+
+on:
+  push:
+    branches:
+      - main
+      - feat/**
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  eval-regression:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: backend
+
+    env:
+      DJANGO_SECRET_KEY: ci-secret-key
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: 127.0.0.1,localhost
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      REDIS_URL: redis://127.0.0.1:6379/0
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ../requirements.txt
+
+      - name: Run eval workflow tests
+        run: pytest tests/workflows/test_eval_runner.py -q
+
+      - name: Run approval and promotion workflow tests
+        run: pytest tests/workflows/test_approval_workflow.py tests/workflows/test_promotion_and_rollback.py -q
